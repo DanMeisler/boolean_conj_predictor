@@ -1,26 +1,37 @@
 import os
 import numpy as np
 
+ONLY_VARIABLE = 0
+ONLY_NOT_VARIABLE = 1
+NONE = 2
+
 
 def generate_random_boolean_conjunction(d):
-    return np.random.choice(3, d)
+    random_boolean_conjunction = []
+    for _ in range(d):
+        choice = np.random.randint(0, 3)
+        if choice == ONLY_VARIABLE:
+            random_boolean_conjunction += [1, 0]
+        elif choice == ONLY_NOT_VARIABLE:
+            random_boolean_conjunction += [0, 1]
+        elif choice == NONE:
+            random_boolean_conjunction += [0, 0]
+    return np.array(random_boolean_conjunction)
 
 
 def calculate_label_from_instance(conjunction_predictor, instance):
-    conjunction_predictor_copy = np.copy(conjunction_predictor)
-    for i in range(len(conjunction_predictor_copy)):
-        if conjunction_predictor_copy[i] == 2:
-            conjunction_predictor_copy[i] = instance[i]
-    return 1 if np.array_equal(conjunction_predictor_copy, instance) else 0
+    instance_conjunction = np.array(map(lambda x: [1, 0] if x else [0, 1], instance))\
+        .reshape(conjunction_predictor.shape)
+    return 1 if np.array_equal(conjunction_predictor, conjunction_predictor & instance_conjunction) else 0
 
 
-def generate_training_data_from_conjunction_predictor(conjunction_predictor, data_size):
+def generate_training_data_from_conjunction_predictor(conjunction_predictor, d, data_size):
     matrix = np.array([])
     for _ in range(data_size):
-        instance = np.random.choice(2, len(conjunction_predictor))
+        instance = np.random.choice(2, d)
         matrix = np.append(matrix, np.append(instance, calculate_label_from_instance(conjunction_predictor, instance)))
 
-    return matrix.reshape((data_size, len(conjunction_predictor) + 1))
+    return matrix.reshape((data_size, d + 1))
 
 
 def save_training_data(training_data):
@@ -35,4 +46,4 @@ if __name__ == "__main__":
     data_size = 15
     random_conjunction_predictor = generate_random_boolean_conjunction(d)
     print random_conjunction_predictor
-    save_training_data(generate_training_data_from_conjunction_predictor(random_conjunction_predictor, data_size))
+    save_training_data(generate_training_data_from_conjunction_predictor(random_conjunction_predictor, d, data_size))
