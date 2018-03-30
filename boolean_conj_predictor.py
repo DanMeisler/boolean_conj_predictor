@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 
 
@@ -30,7 +31,9 @@ def consistency_algorithm(d, x_of_training_data, y_of_training_data):
 
 
 if __name__ == "__main__":
-    file_path = os.path.join(r"./trainingData/example1.txt")
+    if len(sys.argv) != 2:
+        exit(1)
+    file_path = os.path.join(sys.argv[1])
     training_examples = np.loadtxt(file_path).astype(int)
     d = training_examples.shape[1] - 1
     x_of_training_data = training_examples[:, :-1]
